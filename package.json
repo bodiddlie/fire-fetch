@@ -5,7 +5,10 @@
     "Render-Prop React components for fetching data from the Firebase realtime database",
   "main": "dist/index.js",
   "module": "dist/index.es.js",
-  "repository": "https://github.com/bodiddlie/fire-fetch",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bodiddlie/fire-fetch.git"
+  },
   "author": "Nick Klepinger <bodiddlie@gmail.com>",
   "license": "MIT",
   "devDependencies": {

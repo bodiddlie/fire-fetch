@@ -20,6 +20,7 @@ class AuthListener extends React.Component {
     user: PropTypes.oneOfType([PropTypes.object, PropTypes.bool]),
     signInProvider: PropTypes.func,
     signInEmail: PropTypes.func,
+    signOut: PropTypes.func,
   };
 
   getChildContext() {
@@ -27,6 +28,7 @@ class AuthListener extends React.Component {
       user: this.state.user,
       signInProvider: this.signInProvider,
       signInEmail: this.signInEmail,
+      signOut: this.signOut,
     };
   }
 
@@ -61,6 +63,10 @@ class AuthListener extends React.Component {
     } else {
       this.props.fbapp.auth().signInWithEmailAndPassword(email, password);
     }
+  };
+
+  signOut = () => {
+    this.props.fbapp.auth().signOut();
   };
 
   render() {
@@ -110,6 +116,33 @@ export function withSignIn(Component) {
     render() {
       return (
         <SignIn>{funcs => <Component {...funcs} {...this.props} />}</SignIn>
+      );
+    }
+  };
+}
+
+export class SignOut extends React.Component {
+  static contextTypes = {
+    signOut: PropTypes.func,
+  };
+
+  render() {
+    const { render, children } = this.props;
+    if (render) {
+      return render(this.context.signOut);
+    } else {
+      return children(this.context.signOut);
+    }
+  }
+}
+
+export function withSignOut(Component) {
+  return class extends React.Component {
+    render() {
+      return (
+        <SignOut>
+          {signOut => <Component signOut={signOut} {...this.props} />}
+        </SignOut>
       );
     }
   };

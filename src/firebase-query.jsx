@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { objectToArray } from '../util';
+import { objectToArray } from './util';
 import { withRootRef } from './root-ref';
 import { withFbApp } from './provider';
 

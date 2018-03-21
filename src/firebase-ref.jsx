@@ -3,7 +3,7 @@ import React from 'react';
 import { withRootRef } from './root-ref';
 import { withFbApp } from './provider';
 
-class FirebaseRef extends React.Component {
+export class FirebaseRef extends React.Component {
   getReferences() {
     const { path, paths, fbapp, rootPath } = this.props;
 

@@ -4,14 +4,34 @@ import firebase from 'firebase';
 
 import { withFbApp } from './provider';
 
-const providers = {
+export const providers = {
   google: new firebase.auth.GoogleAuthProvider(),
   facebook: new firebase.auth.FacebookAuthProvider(),
   twitter: new firebase.auth.TwitterAuthProvider(),
   github: new firebase.auth.GithubAuthProvider(),
 };
 
-class AuthListener extends React.Component {
+export function signInProvider(fbapp, provider, redirect) {
+  if (redirect) {
+    fbapp.auth().signInWithRedirect(provider);
+  } else {
+    fbapp.auth().signInWithPopup(provider);
+  }
+}
+
+export function signInEmail(fbapp, email, password, isCreating) {
+  if (isCreating) {
+    fbapp.auth().createUserWithEmailAndPassword(email, password);
+  } else {
+    fbapp.auth().signInWithEmailAndPassword(email, password);
+  }
+}
+
+export function signOut(fbapp) {
+  fbapp.auth().signOut();
+}
+
+export class AuthListener extends React.Component {
   state = {
     user: null,
   };
@@ -46,27 +66,16 @@ class AuthListener extends React.Component {
     this.unsubscribe();
   }
 
-  signInProvider = (method, redirect) => {
-    if (redirect) {
-      this.props.fbapp
-        .auth()
-        .signInWithRedirect(providers[method])
-        .catch(alert);
-    } else {
-      this.props.fbapp.auth().signInWithPopup(providers[method]);
-    }
+  signInProvider = (provider, redirect) => {
+    signInProvider(this.props.fbapp, provider, redirect);
   };
 
   signInEmail = (email, password, isCreating) => {
-    if (isCreating) {
-      this.props.fbapp.auth().createUserWithEmailAndPassword(email, password);
-    } else {
-      this.props.fbapp.auth().signInWithEmailAndPassword(email, password);
-    }
+    signInEmail(this.props.fbapp, email, password, isCreating);
   };
 
   signOut = () => {
-    this.props.fbapp.auth().signOut();
+    signOut(this.props.fbapp);
   };
 
   render() {

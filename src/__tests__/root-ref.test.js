@@ -35,20 +35,9 @@ test('<RootRef /> sets rootPath when updated', () => {
   expect(wrapper.state().rootPath).toEqual(path);
 });
 
-test('<GetRootRef /> uses render prop when passed as render', () => {
-  const render = jest.fn(rootPath => <Dummy />);
-  const wrapper = mount(
-    <RootRef path={path}>
-      <GetRootRef render={render} />
-    </RootRef>
-  );
-
-  expect(render).toHaveBeenCalledWith(path);
-});
-
 test('<GetRootRef /> uses render prop when passed as children', () => {
   const render = jest.fn(rootPath => <Dummy />);
-  const wrapper = mount(
+  mount(
     <RootRef path={path}>
       <GetRootRef>{render}</GetRootRef>
     </RootRef>

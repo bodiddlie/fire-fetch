@@ -1,8 +1,20 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import firebase from 'firebase';
+import { createContext } from 'react-broadcast';
 
 import { withFbApp } from './provider';
+
+const noop = () => {};
+const { Provider: UserProvider, Consumer: User } = createContext(null);
+
+const { Provider: SignInProvider, Consumer: SignIn } = createContext({
+  signInProvider: noop,
+  signInEmail: noop,
+});
+
+const { Provider: SignOutProvider, Consumer: SignOut } = createContext(noop);
+
+export { User, SignIn, SignOut };
 
 export const providers = {
   google: new firebase.auth.GoogleAuthProvider(),
@@ -36,22 +48,6 @@ export class AuthListener extends React.Component {
     user: null,
   };
 
-  static childContextTypes = {
-    user: PropTypes.oneOfType([PropTypes.object, PropTypes.bool]),
-    signInProvider: PropTypes.func,
-    signInEmail: PropTypes.func,
-    signOut: PropTypes.func,
-  };
-
-  getChildContext() {
-    return {
-      user: this.state.user,
-      signInProvider: this.signInProvider,
-      signInEmail: this.signInEmail,
-      signOut: this.signOut,
-    };
-  }
-
   componentDidMount() {
     const { fbapp } = this.props;
 
@@ -80,26 +76,27 @@ export class AuthListener extends React.Component {
 
   render() {
     const { render, children } = this.props;
+    const { user } = this.state;
 
-    if (render) {
-      return render(this.state.user);
-    } else {
-      return children(this.state.user);
-    }
+    const renderFunc = render || children;
+    const signInValue = {
+      signInProvider: this.signInProvider,
+      signInEmail: this.signInEmail,
+    };
+
+    return (
+      <UserProvider value={user}>
+        <SignInProvider value={signInValue}>
+          <SignOutProvider value={this.signOut}>
+            {renderFunc(user)}
+          </SignOutProvider>
+        </SignInProvider>
+      </UserProvider>
+    );
   }
 }
 
 export default withFbApp(AuthListener);
-
-export class User extends React.Component {
-  static contextTypes = {
-    user: PropTypes.object,
-  };
-
-  render() {
-    return this.props.children(this.context.user);
-  }
-}
 
 export function withUser(Component) {
   return class extends React.Component {
@@ -107,17 +104,6 @@ export function withUser(Component) {
       return <User>{user => <Component user={user} {...this.props} />}</User>;
     }
   };
-}
-
-export class SignIn extends React.Component {
-  static contextTypes = {
-    signInProvider: PropTypes.func,
-    signInEmail: PropTypes.func,
-  };
-
-  render() {
-    return this.props.children({ ...this.context });
-  }
 }
 
 export function withSignIn(Component) {
@@ -128,21 +114,6 @@ export function withSignIn(Component) {
       );
     }
   };
-}
-
-export class SignOut extends React.Component {
-  static contextTypes = {
-    signOut: PropTypes.func,
-  };
-
-  render() {
-    const { render, children } = this.props;
-    if (render) {
-      return render(this.context.signOut);
-    } else {
-      return children(this.context.signOut);
-    }
-  }
 }
 
 export function withSignOut(Component) {

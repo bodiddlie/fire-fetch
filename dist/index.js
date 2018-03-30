@@ -6,7 +6,7 @@ function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'defau
 
 var React = _interopDefault(require('react'));
 var firebase = _interopDefault(require('firebase'));
-var PropTypes = _interopDefault(require('prop-types'));
+var reactBroadcast = require('react-broadcast');
 
 var classCallCheck = function (instance, Constructor) {
   if (!(instance instanceof Constructor)) {
@@ -52,6 +52,10 @@ var possibleConstructorReturn = function (self, call) {
   return call && (typeof call === "object" || typeof call === "function") ? call : self;
 };
 
+var _createContext = reactBroadcast.createContext(null),
+    Provider = _createContext.Provider,
+    FirebaseApp = _createContext.Consumer;
+
 var FirebaseProvider = function (_React$Component) {
   inherits(FirebaseProvider, _React$Component);
 
@@ -65,13 +69,9 @@ var FirebaseProvider = function (_React$Component) {
     }
 
     return _ret = (_temp = (_this = possibleConstructorReturn(this, _React$Component.call.apply(_React$Component, [this].concat(args))), _this), _this.state = {
-      fbapp: null
+      fbapp: Provider.defaultValue
     }, _temp), possibleConstructorReturn(_this, _ret);
   }
-
-  FirebaseProvider.prototype.getChildContext = function getChildContext() {
-    return _extends({}, this.state);
-  };
 
   FirebaseProvider.prototype.componentDidMount = function componentDidMount() {
     var config = this.props.config;
@@ -83,60 +83,33 @@ var FirebaseProvider = function (_React$Component) {
   };
 
   FirebaseProvider.prototype.render = function render() {
-    return this.state.fbapp === null ? null : this.props.children;
+    return this.state.fbapp === null ? null : React.createElement(
+      Provider,
+      { value: this.state.fbapp },
+      this.props.children
+    );
   };
 
   return FirebaseProvider;
 }(React.Component);
 
-FirebaseProvider.childContextTypes = {
-  fbapp: PropTypes.object
-};
-
-var FirebaseApp = function (_React$Component2) {
-  inherits(FirebaseApp, _React$Component2);
-
-  function FirebaseApp() {
-    classCallCheck(this, FirebaseApp);
-    return possibleConstructorReturn(this, _React$Component2.apply(this, arguments));
-  }
-
-  FirebaseApp.prototype.render = function render() {
-    var _props = this.props,
-        render = _props.render,
-        children = _props.children;
-
-
-    if (render) {
-      return render(this.context.fbapp);
-    } else {
-      return children(this.context.fbapp);
-    }
-  };
-
-  return FirebaseApp;
-}(React.Component);
-
-FirebaseApp.contextTypes = {
-  fbapp: PropTypes.object
-};
 function withFbApp(Component) {
-  return function (_React$Component3) {
-    inherits(_class, _React$Component3);
+  return function (_React$Component2) {
+    inherits(_class, _React$Component2);
 
     function _class() {
       classCallCheck(this, _class);
-      return possibleConstructorReturn(this, _React$Component3.apply(this, arguments));
+      return possibleConstructorReturn(this, _React$Component2.apply(this, arguments));
     }
 
     _class.prototype.render = function render() {
-      var _this4 = this;
+      var _this3 = this;
 
       return React.createElement(
         FirebaseApp,
         null,
         function (fbapp) {
-          return React.createElement(Component, _extends({ fbapp: fbapp }, _this4.props));
+          return React.createElement(Component, _extends({ fbapp: fbapp }, _this3.props));
         }
       );
     };
@@ -144,6 +117,10 @@ function withFbApp(Component) {
     return _class;
   }(React.Component);
 }
+
+var _createContext$1 = reactBroadcast.createContext(''),
+    Provider$1 = _createContext$1.Provider,
+    GetRootRef = _createContext$1.Consumer;
 
 var RootRef = function (_React$Component) {
   inherits(RootRef, _React$Component);
@@ -158,13 +135,9 @@ var RootRef = function (_React$Component) {
     }
 
     return _ret = (_temp = (_this = possibleConstructorReturn(this, _React$Component.call.apply(_React$Component, [this].concat(args))), _this), _this.state = {
-      rootPath: _this.props.path || ''
+      rootPath: _this.props.path || Provider$1.defaultValue
     }, _temp), possibleConstructorReturn(_this, _ret);
   }
-
-  RootRef.prototype.getChildContext = function getChildContext() {
-    return this.state;
-  };
 
   RootRef.prototype.componentDidUpdate = function componentDidUpdate(prevProps) {
     var path = this.props.path;
@@ -176,53 +149,36 @@ var RootRef = function (_React$Component) {
   };
 
   RootRef.prototype.render = function render() {
-    return this.props.children;
+    var rootPath = this.state.rootPath;
+
+
+    return React.createElement(
+      Provider$1,
+      { value: rootPath },
+      this.props.children
+    );
   };
 
   return RootRef;
 }(React.Component);
 
-RootRef.childContextTypes = {
-  rootPath: PropTypes.string
-};
-
-var GetRootRef = function (_React$Component2) {
-  inherits(GetRootRef, _React$Component2);
-
-  function GetRootRef() {
-    classCallCheck(this, GetRootRef);
-    return possibleConstructorReturn(this, _React$Component2.apply(this, arguments));
-  }
-
-  GetRootRef.prototype.render = function render() {
-    var render = this.props.render || this.props.children;
-
-    return render(this.context.rootPath);
-  };
-
-  return GetRootRef;
-}(React.Component);
-
-GetRootRef.contextTypes = {
-  rootPath: PropTypes.string
-};
 function withRootRef(Component) {
-  return function (_React$Component3) {
-    inherits(_class, _React$Component3);
+  return function (_React$Component2) {
+    inherits(_class, _React$Component2);
 
     function _class() {
       classCallCheck(this, _class);
-      return possibleConstructorReturn(this, _React$Component3.apply(this, arguments));
+      return possibleConstructorReturn(this, _React$Component2.apply(this, arguments));
     }
 
     _class.prototype.render = function render() {
-      var _this4 = this;
+      var _this3 = this;
 
       return React.createElement(
         GetRootRef,
         null,
         function (rootPath) {
-          return React.createElement(Component, _extends({ rootPath: rootPath }, _this4.props));
+          return React.createElement(Component, _extends({ rootPath: rootPath }, _this3.props));
         }
       );
     };
@@ -393,12 +349,49 @@ var FirebaseQuery = function (_React$Component) {
 
 var firebaseQuery = withRootRef(withFbApp(FirebaseQuery));
 
+var noop = function noop() {};
+
+var _createContext$2 = reactBroadcast.createContext(null),
+    UserProvider = _createContext$2.Provider,
+    User = _createContext$2.Consumer;
+
+var _createContext2 = reactBroadcast.createContext({
+  signInProvider: noop,
+  signInEmail: noop
+}),
+    SignInProvider = _createContext2.Provider,
+    SignIn = _createContext2.Consumer;
+
+var _createContext3 = reactBroadcast.createContext(noop),
+    SignOutProvider = _createContext3.Provider,
+    SignOut = _createContext3.Consumer;
+
 var providers = {
   google: new firebase.auth.GoogleAuthProvider(),
   facebook: new firebase.auth.FacebookAuthProvider(),
   twitter: new firebase.auth.TwitterAuthProvider(),
   github: new firebase.auth.GithubAuthProvider()
 };
+
+function signInProvider(fbapp, provider, redirect) {
+  if (redirect) {
+    fbapp.auth().signInWithRedirect(provider);
+  } else {
+    fbapp.auth().signInWithPopup(provider);
+  }
+}
+
+function signInEmail(fbapp, email, password, isCreating) {
+  if (isCreating) {
+    fbapp.auth().createUserWithEmailAndPassword(email, password);
+  } else {
+    fbapp.auth().signInWithEmailAndPassword(email, password);
+  }
+}
+
+function signOut(fbapp) {
+  fbapp.auth().signOut();
+}
 
 var AuthListener = function (_React$Component) {
   inherits(AuthListener, _React$Component);
@@ -414,31 +407,14 @@ var AuthListener = function (_React$Component) {
 
     return _ret = (_temp = (_this = possibleConstructorReturn(this, _React$Component.call.apply(_React$Component, [this].concat(args))), _this), _this.state = {
       user: null
-    }, _this.signInProvider = function (method, redirect) {
-      if (redirect) {
-        _this.props.fbapp.auth().signInWithRedirect(providers[method]).catch(alert);
-      } else {
-        _this.props.fbapp.auth().signInWithPopup(providers[method]);
-      }
+    }, _this.signInProvider = function (provider, redirect) {
+      signInProvider(_this.props.fbapp, provider, redirect);
     }, _this.signInEmail = function (email, password, isCreating) {
-      if (isCreating) {
-        _this.props.fbapp.auth().createUserWithEmailAndPassword(email, password);
-      } else {
-        _this.props.fbapp.auth().signInWithEmailAndPassword(email, password);
-      }
+      signInEmail(_this.props.fbapp, email, password, isCreating);
     }, _this.signOut = function () {
-      _this.props.fbapp.auth().signOut();
+      signOut(_this.props.fbapp);
     }, _temp), possibleConstructorReturn(_this, _ret);
   }
-
-  AuthListener.prototype.getChildContext = function getChildContext() {
-    return {
-      user: this.state.user,
-      signInProvider: this.signInProvider,
-      signInEmail: this.signInEmail,
-      signOut: this.signOut
-    };
-  };
 
   AuthListener.prototype.componentDidMount = function componentDidMount() {
     var _this2 = this;
@@ -461,63 +437,52 @@ var AuthListener = function (_React$Component) {
     var _props = this.props,
         render = _props.render,
         children = _props.children;
+    var user = this.state.user;
 
 
-    if (render) {
-      return render(this.state.user);
-    } else {
-      return children(this.state.user);
-    }
+    var renderFunc = render || children;
+    var signInValue = {
+      signInProvider: this.signInProvider,
+      signInEmail: this.signInEmail
+    };
+
+    return React.createElement(
+      UserProvider,
+      { value: user },
+      React.createElement(
+        SignInProvider,
+        { value: signInValue },
+        React.createElement(
+          SignOutProvider,
+          { value: this.signOut },
+          renderFunc(user)
+        )
+      )
+    );
   };
 
   return AuthListener;
 }(React.Component);
 
-AuthListener.childContextTypes = {
-  user: PropTypes.oneOfType([PropTypes.object, PropTypes.bool]),
-  signInProvider: PropTypes.func,
-  signInEmail: PropTypes.func,
-  signOut: PropTypes.func
-};
-
-
 var authListener = withFbApp(AuthListener);
 
-var User = function (_React$Component2) {
-  inherits(User, _React$Component2);
-
-  function User() {
-    classCallCheck(this, User);
-    return possibleConstructorReturn(this, _React$Component2.apply(this, arguments));
-  }
-
-  User.prototype.render = function render() {
-    return this.props.children(this.context.user);
-  };
-
-  return User;
-}(React.Component);
-
-User.contextTypes = {
-  user: PropTypes.object
-};
 function withUser(Component) {
-  return function (_React$Component3) {
-    inherits(_class, _React$Component3);
+  return function (_React$Component2) {
+    inherits(_class, _React$Component2);
 
     function _class() {
       classCallCheck(this, _class);
-      return possibleConstructorReturn(this, _React$Component3.apply(this, arguments));
+      return possibleConstructorReturn(this, _React$Component2.apply(this, arguments));
     }
 
     _class.prototype.render = function render() {
-      var _this5 = this;
+      var _this4 = this;
 
       return React.createElement(
         User,
         null,
         function (user) {
-          return React.createElement(Component, _extends({ user: user }, _this5.props));
+          return React.createElement(Component, _extends({ user: user }, _this4.props));
         }
       );
     };
@@ -526,42 +491,23 @@ function withUser(Component) {
   }(React.Component);
 }
 
-var SignIn = function (_React$Component4) {
-  inherits(SignIn, _React$Component4);
-
-  function SignIn() {
-    classCallCheck(this, SignIn);
-    return possibleConstructorReturn(this, _React$Component4.apply(this, arguments));
-  }
-
-  SignIn.prototype.render = function render() {
-    return this.props.children(_extends({}, this.context));
-  };
-
-  return SignIn;
-}(React.Component);
-
-SignIn.contextTypes = {
-  signInProvider: PropTypes.func,
-  signInEmail: PropTypes.func
-};
 function withSignIn(Component) {
-  return function (_React$Component5) {
-    inherits(_class2, _React$Component5);
+  return function (_React$Component3) {
+    inherits(_class2, _React$Component3);
 
     function _class2() {
       classCallCheck(this, _class2);
-      return possibleConstructorReturn(this, _React$Component5.apply(this, arguments));
+      return possibleConstructorReturn(this, _React$Component3.apply(this, arguments));
     }
 
     _class2.prototype.render = function render() {
-      var _this8 = this;
+      var _this6 = this;
 
       return React.createElement(
         SignIn,
         null,
         function (funcs) {
-          return React.createElement(Component, _extends({}, funcs, _this8.props));
+          return React.createElement(Component, _extends({}, funcs, _this6.props));
         }
       );
     };
@@ -570,49 +516,23 @@ function withSignIn(Component) {
   }(React.Component);
 }
 
-var SignOut = function (_React$Component6) {
-  inherits(SignOut, _React$Component6);
-
-  function SignOut() {
-    classCallCheck(this, SignOut);
-    return possibleConstructorReturn(this, _React$Component6.apply(this, arguments));
-  }
-
-  SignOut.prototype.render = function render() {
-    var _props2 = this.props,
-        render = _props2.render,
-        children = _props2.children;
-
-    if (render) {
-      return render(this.context.signOut);
-    } else {
-      return children(this.context.signOut);
-    }
-  };
-
-  return SignOut;
-}(React.Component);
-
-SignOut.contextTypes = {
-  signOut: PropTypes.func
-};
 function withSignOut(Component) {
-  return function (_React$Component7) {
-    inherits(_class3, _React$Component7);
+  return function (_React$Component4) {
+    inherits(_class3, _React$Component4);
 
     function _class3() {
       classCallCheck(this, _class3);
-      return possibleConstructorReturn(this, _React$Component7.apply(this, arguments));
+      return possibleConstructorReturn(this, _React$Component4.apply(this, arguments));
     }
 
     _class3.prototype.render = function render() {
-      var _this11 = this;
+      var _this8 = this;
 
       return React.createElement(
         SignOut,
         null,
         function (signOut) {
-          return React.createElement(Component, _extends({ signOut: signOut }, _this11.props));
+          return React.createElement(Component, _extends({ signOut: signOut }, _this8.props));
         }
       );
     };

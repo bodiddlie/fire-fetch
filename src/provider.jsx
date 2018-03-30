@@ -1,19 +1,15 @@
 import React from 'react';
 import firebase from 'firebase';
-import PropTypes from 'prop-types';
+import { createContext } from 'react-broadcast';
+
+const { Provider, Consumer: FirebaseApp } = createContext(null);
+
+export { FirebaseApp };
 
 class FirebaseProvider extends React.Component {
   state = {
-    fbapp: null,
+    fbapp: Provider.defaultValue,
   };
-
-  static childContextTypes = {
-    fbapp: PropTypes.object,
-  };
-
-  getChildContext() {
-    return { ...this.state };
-  }
 
   componentDidMount() {
     const { config } = this.props;
@@ -26,27 +22,13 @@ class FirebaseProvider extends React.Component {
   }
 
   render() {
-    return this.state.fbapp === null ? null : this.props.children;
+    return this.state.fbapp === null ? null : (
+      <Provider value={this.state.fbapp}>{this.props.children}</Provider>
+    );
   }
 }
 
 export default FirebaseProvider;
-
-export class FirebaseApp extends React.Component {
-  static contextTypes = {
-    fbapp: PropTypes.object,
-  };
-
-  render() {
-    const { render, children } = this.props;
-
-    if (render) {
-      return render(this.context.fbapp);
-    } else {
-      return children(this.context.fbapp);
-    }
-  }
-}
 
 export function withFbApp(Component) {
   return class extends React.Component {

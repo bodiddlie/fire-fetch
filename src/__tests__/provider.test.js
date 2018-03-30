@@ -2,9 +2,9 @@ import React from 'react';
 import { mount } from 'enzyme';
 import firebase from 'firebase';
 
-jest.mock('firebase');
-
 import FirebaseProvider, { FirebaseApp, withFbApp } from '../provider';
+
+jest.mock('firebase');
 
 const config = { test: 'test' };
 
@@ -28,33 +28,6 @@ test('provider renders children if app exists', () => {
   );
 
   expect(wrapper.contains(<div>Hi</div>)).toBeTruthy();
-});
-
-test('provider gives fbapp as context', () => {
-  const wrapper = mount(
-    <FirebaseProvider config={config}>
-      <div>Hi</div>
-    </FirebaseProvider>
-  );
-  expect(wrapper.instance().getChildContext()).toHaveProperty('fbapp');
-});
-
-test('calls the render prop method if passed as render', () => {
-  const render = jest.fn(() => <div />);
-  const wrapper = mount(<FirebaseApp render={render} />, {
-    context: { fbapp },
-  });
-
-  expect(render).toBeCalledWith(fbapp);
-});
-
-test('calls the render prop method is passed as children', () => {
-  const render = jest.fn(() => <div />);
-  const wrapper = mount(<FirebaseApp>{render}</FirebaseApp>, {
-    context: { fbapp },
-  });
-
-  expect(render).toBeCalledWith(fbapp);
 });
 
 test('withFbApp HOC passes fbapp as prop', () => {

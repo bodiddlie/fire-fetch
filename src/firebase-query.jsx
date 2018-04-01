@@ -4,7 +4,7 @@ import { objectToArray } from './util';
 import { withRootRef } from './root-ref';
 import { withFbApp } from './provider';
 
-class FirebaseQuery extends React.Component {
+export class FirebaseQuery extends React.Component {
   state = {
     value: null,
     loading: true,

@@ -1,18 +1,12 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+import { createContext } from 'react-broadcast';
 
-class RootRef extends React.Component {
+const { Provider, Consumer: GetRootRef } = createContext('');
+
+export default class RootRef extends React.Component {
   state = {
-    rootPath: this.props.path || '',
+    rootPath: this.props.path || Provider.defaultValue,
   };
-
-  static childContextTypes = {
-    rootPath: PropTypes.string,
-  };
-
-  getChildContext() {
-    return this.state;
-  }
 
   componentDidUpdate(prevProps) {
     const { path } = this.props;
@@ -23,23 +17,13 @@ class RootRef extends React.Component {
   }
 
   render() {
-    return this.props.children;
+    const { rootPath } = this.state;
+
+    return <Provider value={rootPath}>{this.props.children}</Provider>;
   }
 }
 
-export default RootRef;
-
-export class GetRootRef extends React.Component {
-  static contextTypes = {
-    rootPath: PropTypes.string,
-  };
-
-  render() {
-    const render = this.props.render || this.props.children;
-
-    return render(this.context.rootPath);
-  }
-}
+export { GetRootRef };
 
 export function withRootRef(Component) {
   return class extends React.Component {

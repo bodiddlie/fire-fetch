@@ -1,7 +1,8 @@
 {
   "name": "fire-fetch",
   "version": "0.0.1",
-  "description": "Render-Prop React components for fetching data from the Firebase realtime database",
+  "description":
+    "Render-Prop React components for fetching data from the Firebase realtime database",
   "main": "dist/index.js",
   "module": "dist/index.es.js",
   "repository": {
@@ -38,7 +39,6 @@
     "react-broadcast": "^0.7.0"
   },
   "peerDependencies": {
-    "prop-types": "^15.6.1",
     "react": "^16.2.0"
   },
   "scripts": {

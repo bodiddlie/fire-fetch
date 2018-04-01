@@ -1,6 +1,6 @@
 {
   "name": "fire-fetch",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description":
     "Render-Prop React components for fetching data from the Firebase realtime database",
   "main": "dist/index.js",

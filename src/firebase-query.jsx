@@ -7,7 +7,7 @@ import { withFbApp } from './provider';
 export class FirebaseQuery extends React.Component {
   state = {
     value: null,
-    loading: true
+    loading: true,
   };
 
   getReference(args) {
@@ -27,7 +27,7 @@ export class FirebaseQuery extends React.Component {
       once,
       orderByChild,
       equalTo,
-      limitToLast
+      limitToLast,
     } = this.props;
 
     if (orderByChild) {
@@ -43,7 +43,7 @@ export class FirebaseQuery extends React.Component {
     }
 
     if (on) {
-      reference.on("value", snapshot => {
+      reference.on('value', snapshot => {
         const val = snapshot.val();
         const value = toArray ? objectToArray(val) : val;
         this.setState({ value, loading: false });
@@ -54,7 +54,7 @@ export class FirebaseQuery extends React.Component {
     }
 
     if (once) {
-      reference.once("value", snapshot => {
+      reference.once('value', snapshot => {
         const val = snapshot.val();
         const value = toArray ? objectToArray(val) : val;
         this.setState({ value, loading: false });
@@ -72,7 +72,7 @@ export class FirebaseQuery extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    if (prevProps.path != this.props.path) {
+    if (prevProps.path !== this.props.path) {
       // Get the old reference and turn off subs
       this.ref.off();
       this.ref = undefined;

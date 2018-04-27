@@ -259,12 +259,11 @@ var FirebaseQuery = function (_React$Component) {
     }, _temp), possibleConstructorReturn(_this, _ret);
   }
 
-  FirebaseQuery.prototype.getReference = function getReference() {
-    var _props = this.props,
-        path = _props.path,
-        reference = _props.reference,
-        fbapp = _props.fbapp,
-        rootPath = _props.rootPath;
+  FirebaseQuery.prototype.getReference = function getReference(args) {
+    var path = args.path,
+        reference = args.reference,
+        fbapp = args.fbapp,
+        rootPath = args.rootPath;
 
     if (reference) {
       return reference;
@@ -273,35 +272,33 @@ var FirebaseQuery = function (_React$Component) {
     }
   };
 
-  FirebaseQuery.prototype.buildQuery = function buildQuery() {
+  FirebaseQuery.prototype.buildQuery = function buildQuery(reference) {
     var _this2 = this;
 
-    var _props2 = this.props,
-        on = _props2.on,
-        toArray$$1 = _props2.toArray,
-        onChange = _props2.onChange,
-        once = _props2.once,
-        orderByChild = _props2.orderByChild,
-        equalTo = _props2.equalTo,
-        limitToLast = _props2.limitToLast;
+    var _props = this.props,
+        on = _props.on,
+        toArray$$1 = _props.toArray,
+        onChange = _props.onChange,
+        once = _props.once,
+        orderByChild = _props.orderByChild,
+        equalTo = _props.equalTo,
+        limitToLast = _props.limitToLast;
 
-
-    this.ref = this.getReference();
 
     if (orderByChild) {
-      this.ref = this.ref.orderByChild(orderByChild);
+      reference = reference.orderByChild(orderByChild);
     }
 
     if (equalTo || equalTo === false) {
-      this.ref = this.ref.equalTo(equalTo);
+      reference = reference.equalTo(equalTo);
     }
 
     if (limitToLast) {
-      this.ref = this.ref.limitToLast(limitToLast);
+      reference = reference.limitToLast(limitToLast);
     }
 
     if (on) {
-      this.ref.on('value', function (snapshot) {
+      reference.on('value', function (snapshot) {
         var val = snapshot.val();
         var value = toArray$$1 ? objectToArray(val) : val;
         _this2.setState({ value: value, loading: false });
@@ -312,7 +309,7 @@ var FirebaseQuery = function (_React$Component) {
     }
 
     if (once) {
-      this.ref.once('value', function (snapshot) {
+      reference.once('value', function (snapshot) {
         var val = snapshot.val();
         var value = toArray$$1 ? objectToArray(val) : val;
         _this2.setState({ value: value, loading: false });
@@ -324,18 +321,31 @@ var FirebaseQuery = function (_React$Component) {
   };
 
   FirebaseQuery.prototype.componentDidMount = function componentDidMount() {
-    this.buildQuery();
+    var currentRef = this.getReference(this.props);
+    this.ref = currentRef;
+    this.buildQuery(currentRef);
+  };
+
+  FirebaseQuery.prototype.componentDidUpdate = function componentDidUpdate(prevProps) {
+    if (prevProps.path != this.props.path) {
+      // Get the old reference and turn off subs
+      this.ref.off();
+      this.ref = undefined;
+      var newReference = this.getReference(this.props);
+      this.ref = newReference;
+      this.buildQuery(newReference);
+    }
   };
 
   FirebaseQuery.prototype.componentWillUnmount = function componentWillUnmount() {
-    this.ref.off();
+    this.ref;
   };
 
   FirebaseQuery.prototype.render = function render() {
-    var _props3 = this.props,
-        render = _props3.render,
-        children = _props3.children,
-        toArray$$1 = _props3.toArray;
+    var _props2 = this.props,
+        render = _props2.render,
+        children = _props2.children,
+        toArray$$1 = _props2.toArray;
     var loading = this.state.loading;
 
 

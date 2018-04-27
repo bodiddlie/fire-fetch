@@ -321,7 +321,7 @@ var FirebaseQuery = function (_React$Component) {
   };
 
   FirebaseQuery.prototype.componentDidUpdate = function componentDidUpdate(prevProps) {
-    if (prevProps.path != this.props.path) {
+    if (prevProps.path !== this.props.path) {
       // Get the old reference and turn off subs
       this.ref.off();
       this.ref = undefined;
@@ -332,7 +332,7 @@ var FirebaseQuery = function (_React$Component) {
   };
 
   FirebaseQuery.prototype.componentWillUnmount = function componentWillUnmount() {
-    this.ref;
+    this.ref.off();
   };
 
   FirebaseQuery.prototype.render = function render() {

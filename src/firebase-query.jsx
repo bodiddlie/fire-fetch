@@ -10,8 +10,8 @@ export class FirebaseQuery extends React.Component {
     loading: true,
   };
 
-  getReference() {
-    const { path, reference, fbapp, rootPath } = this.props;
+  getReference(args) {
+    const { path, reference, fbapp, rootPath } = args;
     if (reference) {
       return reference;
     } else {
@@ -19,7 +19,7 @@ export class FirebaseQuery extends React.Component {
     }
   }
 
-  buildQuery() {
+  buildQuery(reference) {
     const {
       on,
       toArray,
@@ -30,22 +30,20 @@ export class FirebaseQuery extends React.Component {
       limitToLast,
     } = this.props;
 
-    this.ref = this.getReference();
-
     if (orderByChild) {
-      this.ref = this.ref.orderByChild(orderByChild);
+      reference = reference.orderByChild(orderByChild);
     }
 
     if (equalTo || equalTo === false) {
-      this.ref = this.ref.equalTo(equalTo);
+      reference = reference.equalTo(equalTo);
     }
 
     if (limitToLast) {
-      this.ref = this.ref.limitToLast(limitToLast);
+      reference = reference.limitToLast(limitToLast);
     }
 
     if (on) {
-      this.ref.on('value', snapshot => {
+      reference.on('value', snapshot => {
         const val = snapshot.val();
         const value = toArray ? objectToArray(val) : val;
         this.setState({ value, loading: false });
@@ -56,7 +54,7 @@ export class FirebaseQuery extends React.Component {
     }
 
     if (once) {
-      this.ref.once('value', snapshot => {
+      reference.once('value', snapshot => {
         const val = snapshot.val();
         const value = toArray ? objectToArray(val) : val;
         this.setState({ value, loading: false });
@@ -68,7 +66,20 @@ export class FirebaseQuery extends React.Component {
   }
 
   componentDidMount() {
-    this.buildQuery();
+    const currentRef = this.getReference(this.props);
+    this.ref = currentRef;
+    this.buildQuery(currentRef);
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.path !== this.props.path) {
+      // Get the old reference and turn off subs
+      this.ref.off();
+      this.ref = undefined;
+      const newReference = this.getReference(this.props);
+      this.ref = newReference;
+      this.buildQuery(newReference);
+    }
   }
 
   componentWillUnmount() {

@@ -198,6 +198,33 @@ test('calls off when unmounted', () => {
 
   expect(myRef.off).toHaveBeenCalled();
 });
+
+test('detaches old ref if path is updated', () => {
+  const app = makeApp();
+  const myRef = makeRef('myref');
+  const render = jest.fn((value, loading, ref) => <Dummy />);
+  const wrapper = mount(
+    <FirebaseQuery fbapp={app} reference={myRef} once toArray>
+      {render}
+    </FirebaseQuery>
+  );
+  wrapper.setProps({ path: 'newPath' });
+  expect(myRef.off).toHaveBeenCalled();
+});
+
+test('attaches new ref if path is updated', () => {
+  const app = makeApp();
+  const render = jest.fn((value, loading, ref) => <Dummy />);
+  const wrapper = mount(
+    <FirebaseQuery fbapp={app} once toArray>
+      {render}
+    </FirebaseQuery>
+  );
+  const originalRef = wrapper.instance().ref;
+  wrapper.setProps({ path: 'newPath' });
+  wrapper.update();
+  expect(wrapper.instance().ref).not.toBe(originalRef);
+});
 //---------------------------------------------
 // UTIL
 //---------------------------------------------

@@ -1,10 +1,10 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 
 import { objectToArray } from './util';
 import { withRootRef } from './root-ref';
 import { withFbApp } from './provider';
 
+const PropTypes = {};
 const propTypes = {
   fbapp: PropTypes.func,
   rootPath: PropTypes.string,

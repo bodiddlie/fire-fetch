@@ -199,7 +199,7 @@ test('calls off when unmounted', () => {
   expect(myRef.off).toHaveBeenCalled();
 });
 
-test('detaches old ref if path is updated', () => {
+test('detaches old ref if it needs to be updated', () => {
   const app = makeApp();
   const myRef = makeRef('myref');
   const render = jest.fn((value, loading, ref) => <Dummy />);
@@ -208,11 +208,12 @@ test('detaches old ref if path is updated', () => {
       {render}
     </FirebaseQuery>
   );
+  const preUpdateRef = wrapper.instance().ref;
   wrapper.setProps({ path: 'newPath' });
-  expect(myRef.off).toHaveBeenCalled();
+  expect(preUpdateRef.off).toHaveBeenCalled();
 });
 
-test('attaches new ref if path is updated', () => {
+test('attaches new ref if it needs to be updated', () => {
   const app = makeApp();
   const render = jest.fn((value, loading, ref) => <Dummy />);
   const wrapper = mount(
@@ -224,6 +225,39 @@ test('attaches new ref if path is updated', () => {
   wrapper.setProps({ path: 'newPath' });
   wrapper.update();
   expect(wrapper.instance().ref).not.toBe(originalRef);
+});
+
+test('updates on any ref impacting prop', () => {
+  const app = makeApp();
+  const render = jest.fn((value, loading, ref) => <Dummy />);
+  const propsThatUpdateRef = {
+    fbapp: makeApp(),
+    rootPath: "newRootPath",
+    path: "newPath",
+    reference: makeRef("someOtherPath"),
+    on: () => {},
+    toArray: true,
+    onChange: () => {},
+    once: true,
+    orderByChild: "someStringToOrderBy",
+    equalTo: "string",
+    limitToLast: 5,
+  };
+  Object.keys(propsThatUpdateRef).forEach(keyThatUpdates => {
+    const newProp = { [keyThatUpdates]: propsThatUpdateRef[keyThatUpdates]};
+    const wrapper = mount(
+      <FirebaseQuery fbapp={app}>
+        {render}
+      </FirebaseQuery>
+    );
+    const originalRef = wrapper.instance().ref;
+    wrapper.setProps(newProp);
+    wrapper.update();
+    const newRef = wrapper.instance().ref;
+    
+    expect(originalRef.off).toHaveBeenCalled();
+    expect(newRef).not.toBe(originalRef);
+  });
 });
 //---------------------------------------------
 // UTIL

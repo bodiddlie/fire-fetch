@@ -1,8 +1,44 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import { objectToArray } from './util';
 import { withRootRef } from './root-ref';
 import { withFbApp } from './provider';
+
+const propTypes = {
+  fbapp: PropTypes.func,
+  rootPath: PropTypes.string,
+  path: PropTypes.string,
+  reference: PropTypes.func,
+  on: PropTypes.func,
+  toArray: PropTypes.bool,
+  onChange: PropTypes.func,
+  once: PropTypes.bool,
+  orderByChild: PropTypes.string,
+  equalTo: PropTypes.bool,
+  limitToLast: PropTypes.number,
+  children: PropTypes.func,
+  render: PropTypes.func,
+};
+
+const onlyRefImpacting = propKey => propKey !== 'render' && propKey !== 'children';
+
+const shallowEqual = (oldProps, newProps) => {
+  if (oldProps === newProps) {
+    return true;
+  }
+  const keysToCompare = Object.keys(propTypes).filter(onlyRefImpacting);
+  const shouldUpdate = keysToCompare.every(key => oldProps[key] === newProps[key]);
+  return shouldUpdate;
+};
+
+const buildReference = ({ path, reference, fbapp, rootPath }) => {
+  if (reference) {
+    return reference;
+  } else {
+    return fbapp.database().ref(`${rootPath}/${path}`);
+  }
+}
 
 export class FirebaseQuery extends React.Component {
   state = {
@@ -10,16 +46,7 @@ export class FirebaseQuery extends React.Component {
     loading: true,
   };
 
-  getReference(args) {
-    const { path, reference, fbapp, rootPath } = args;
-    if (reference) {
-      return reference;
-    } else {
-      return fbapp.database().ref(`${rootPath}/${path}`);
-    }
-  }
-
-  buildQuery(reference) {
+  buildQuery() {
     const {
       on,
       toArray,
@@ -29,6 +56,8 @@ export class FirebaseQuery extends React.Component {
       equalTo,
       limitToLast,
     } = this.props;
+
+    let reference = buildReference(this.props);
 
     if (orderByChild) {
       reference = reference.orderByChild(orderByChild);
@@ -63,22 +92,22 @@ export class FirebaseQuery extends React.Component {
         }
       });
     }
+
+    return reference;
   }
 
   componentDidMount() {
-    const currentRef = this.getReference(this.props);
-    this.ref = currentRef;
-    this.buildQuery(currentRef);
+    const updatedReference = this.buildQuery();
+    this.ref = updatedReference;
   }
 
   componentDidUpdate(prevProps) {
-    if (prevProps.path !== this.props.path) {
+    if (!shallowEqual(prevProps, this.props)) {
       // Get the old reference and turn off subs
       this.ref.off();
       this.ref = undefined;
-      const newReference = this.getReference(this.props);
-      this.ref = newReference;
-      this.buildQuery(newReference);
+      const updatedReference = this.buildQuery();
+      this.ref = updatedReference;
     }
   }
 

@@ -235,6 +235,51 @@ function objectToArray(object) {
   }, []);
 }
 
+var PropTypes = {};
+var propTypes = {
+  fbapp: PropTypes.func,
+  rootPath: PropTypes.string,
+  path: PropTypes.string,
+  reference: PropTypes.func,
+  on: PropTypes.func,
+  toArray: PropTypes.bool,
+  onChange: PropTypes.func,
+  once: PropTypes.bool,
+  orderByChild: PropTypes.string,
+  equalTo: PropTypes.bool,
+  limitToLast: PropTypes.number,
+  children: PropTypes.func,
+  render: PropTypes.func
+};
+
+var onlyRefImpacting = function onlyRefImpacting(propKey) {
+  return propKey !== 'render' && propKey !== 'children';
+};
+
+var shallowEqual = function shallowEqual(oldProps, newProps) {
+  if (oldProps === newProps) {
+    return true;
+  }
+  var keysToCompare = Object.keys(propTypes).filter(onlyRefImpacting);
+  var shouldUpdate = keysToCompare.every(function (key) {
+    return oldProps[key] === newProps[key];
+  });
+  return shouldUpdate;
+};
+
+var buildReference = function buildReference(_ref) {
+  var path = _ref.path,
+      reference = _ref.reference,
+      fbapp = _ref.fbapp,
+      rootPath = _ref.rootPath;
+
+  if (reference) {
+    return reference;
+  } else {
+    return fbapp.database().ref(rootPath + '/' + path);
+  }
+};
+
 var FirebaseQuery = function (_React$Component) {
   inherits(FirebaseQuery, _React$Component);
 
@@ -253,20 +298,7 @@ var FirebaseQuery = function (_React$Component) {
     }, _temp), possibleConstructorReturn(_this, _ret);
   }
 
-  FirebaseQuery.prototype.getReference = function getReference(args) {
-    var path = args.path,
-        reference = args.reference,
-        fbapp = args.fbapp,
-        rootPath = args.rootPath;
-
-    if (reference) {
-      return reference;
-    } else {
-      return fbapp.database().ref(rootPath + '/' + path);
-    }
-  };
-
-  FirebaseQuery.prototype.buildQuery = function buildQuery(reference) {
+  FirebaseQuery.prototype.buildQuery = function buildQuery() {
     var _this2 = this;
 
     var _props = this.props,
@@ -278,6 +310,8 @@ var FirebaseQuery = function (_React$Component) {
         equalTo = _props.equalTo,
         limitToLast = _props.limitToLast;
 
+
+    var reference = buildReference(this.props);
 
     if (orderByChild) {
       reference = reference.orderByChild(orderByChild);
@@ -312,22 +346,22 @@ var FirebaseQuery = function (_React$Component) {
         }
       });
     }
+
+    return reference;
   };
 
   FirebaseQuery.prototype.componentDidMount = function componentDidMount() {
-    var currentRef = this.getReference(this.props);
-    this.ref = currentRef;
-    this.buildQuery(currentRef);
+    var updatedReference = this.buildQuery();
+    this.ref = updatedReference;
   };
 
   FirebaseQuery.prototype.componentDidUpdate = function componentDidUpdate(prevProps) {
-    if (prevProps.path !== this.props.path) {
+    if (!shallowEqual(prevProps, this.props)) {
       // Get the old reference and turn off subs
       this.ref.off();
       this.ref = undefined;
-      var newReference = this.getReference(this.props);
-      this.ref = newReference;
-      this.buildQuery(newReference);
+      var updatedReference = this.buildQuery();
+      this.ref = updatedReference;
     }
   };
 

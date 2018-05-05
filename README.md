@@ -423,15 +423,21 @@ Firebase queries return objects, not arrays, which can make lists of data strang
 
 ##### on
 
-> `boolean` | optional
+> `boolean` or `string` | optional
 
-This will set the query up to update whenever the data in the database changes.
+The `on` prop will setup a query to update whenver the given firebase event fires. `on` will accept any of the following event strings: `child_added`, `child_removed`, `child_changed`, `child_moved`, and `value`. It will also accept a boolean which will update on `value` events.
 
 ##### once
 
+> `boolean` or `string` | optional
+
+The `once` prop will setup a query to update whenver the given firebase event fires. `once` will accept any of the following event strings: `child_added`, `child_removed`, `child_changed`, `child_moved`, and `value`. It will also accept a boolean which will update on `value` events.
+
+##### updateOnValue
+
 > `boolean` | optional
 
-This will cause the query to fire only once, meaning that any changes in the data will **not** be updated through the query.
+Will set the query to update the returned value on all `value` events.
 
 ##### orderByChild
 

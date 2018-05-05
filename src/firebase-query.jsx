@@ -10,7 +10,8 @@ const propTypes = {
   rootPath: PropTypes.string,
   path: PropTypes.string,
   reference: PropTypes.func,
-  on: PropTypes.func,
+  on: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
+  updateValue: PropTypes.bool,
   toArray: PropTypes.bool,
   onChange: PropTypes.func,
   once: PropTypes.bool,
@@ -21,14 +22,17 @@ const propTypes = {
   render: PropTypes.func,
 };
 
-const onlyRefImpacting = propKey => propKey !== 'render' && propKey !== 'children';
+const onlyRefImpacting = propKey =>
+  propKey !== 'render' && propKey !== 'children';
 
 const shallowEqual = (oldProps, newProps) => {
   if (oldProps === newProps) {
     return true;
   }
   const keysToCompare = Object.keys(propTypes).filter(onlyRefImpacting);
-  const shouldUpdate = keysToCompare.every(key => oldProps[key] === newProps[key]);
+  const shouldUpdate = keysToCompare.every(
+    key => oldProps[key] === newProps[key]
+  );
   return shouldUpdate;
 };
 
@@ -38,7 +42,7 @@ const buildReference = ({ path, reference, fbapp, rootPath }) => {
   } else {
     return fbapp.database().ref(`${rootPath}/${path}`);
   }
-}
+};
 
 export class FirebaseQuery extends React.Component {
   state = {

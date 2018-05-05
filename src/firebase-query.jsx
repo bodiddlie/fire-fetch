@@ -1,20 +1,36 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import { objectToArray } from './util';
 import { withRootRef } from './root-ref';
 import { withFbApp } from './provider';
 
-const PropTypes = {};
 const propTypes = {
   fbapp: PropTypes.func,
   rootPath: PropTypes.string,
   path: PropTypes.string,
   reference: PropTypes.func,
-  on: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
-  updateValue: PropTypes.bool,
+  on: PropTypes.oneOf([
+    true,
+    false,
+    'child_added',
+    'value',
+    'child_removed',
+    'child_changed',
+    'child_moved',
+  ]),
+  updateOnValue: PropTypes.bool,
   toArray: PropTypes.bool,
   onChange: PropTypes.func,
-  once: PropTypes.bool,
+  once: PropTypes.oneOf([
+    true,
+    false,
+    'child_added',
+    'value',
+    'child_removed',
+    'child_changed',
+    'child_moved',
+  ]),
   orderByChild: PropTypes.string,
   equalTo: PropTypes.bool,
   limitToLast: PropTypes.number,
@@ -59,6 +75,7 @@ export class FirebaseQuery extends React.Component {
       orderByChild,
       equalTo,
       limitToLast,
+      updateOnValue,
     } = this.props;
 
     let reference = buildReference(this.props);
@@ -75,8 +92,15 @@ export class FirebaseQuery extends React.Component {
       reference = reference.limitToLast(limitToLast);
     }
 
-    if (on) {
-      reference.on('value', snapshot => {
+    let onValue = null;
+    if (updateOnValue || (typeof on === 'boolean' && on)) {
+      onValue = 'value';
+    } else if (typeof on === 'string') {
+      onValue = on;
+    }
+
+    if (!!onValue) {
+      reference.on(onValue, snapshot => {
         const val = snapshot.val();
         const value = toArray ? objectToArray(val) : val;
         this.setState({ value, loading: false });
@@ -86,8 +110,15 @@ export class FirebaseQuery extends React.Component {
       });
     }
 
-    if (once) {
-      reference.once('value', snapshot => {
+    let onceValue = null;
+    if (typeof once === 'boolean' && once) {
+      onceValue = 'value';
+    } else if (typeof once === 'string') {
+      onceValue = once;
+    }
+
+    if (!!onceValue) {
+      reference.once(onceValue, snapshot => {
         const val = snapshot.val();
         const value = toArray ? objectToArray(val) : val;
         this.setState({ value, loading: false });

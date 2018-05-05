@@ -1,6 +1,7 @@
 import React from 'react';
 import firebase from 'firebase';
 import { createContext } from 'react-broadcast';
+import PropTypes from 'prop-types';
 
 var classCallCheck = function (instance, Constructor) {
   if (!(instance instanceof Constructor)) {
@@ -235,16 +236,16 @@ function objectToArray(object) {
   }, []);
 }
 
-var PropTypes = {};
 var propTypes = {
   fbapp: PropTypes.func,
   rootPath: PropTypes.string,
   path: PropTypes.string,
   reference: PropTypes.func,
-  on: PropTypes.func,
+  on: PropTypes.oneOf([true, false, 'child_added', 'value', 'child_removed', 'child_changed', 'child_moved']),
+  updateOnValue: PropTypes.bool,
   toArray: PropTypes.bool,
   onChange: PropTypes.func,
-  once: PropTypes.bool,
+  once: PropTypes.oneOf([true, false, 'child_added', 'value', 'child_removed', 'child_changed', 'child_moved']),
   orderByChild: PropTypes.string,
   equalTo: PropTypes.bool,
   limitToLast: PropTypes.number,
@@ -308,7 +309,8 @@ var FirebaseQuery = function (_React$Component) {
         once = _props.once,
         orderByChild = _props.orderByChild,
         equalTo = _props.equalTo,
-        limitToLast = _props.limitToLast;
+        limitToLast = _props.limitToLast,
+        updateOnValue = _props.updateOnValue;
 
 
     var reference = buildReference(this.props);
@@ -325,8 +327,15 @@ var FirebaseQuery = function (_React$Component) {
       reference = reference.limitToLast(limitToLast);
     }
 
-    if (on) {
-      reference.on('value', function (snapshot) {
+    var onValue = null;
+    if (updateOnValue || typeof on === 'boolean' && on) {
+      onValue = 'value';
+    } else if (typeof on === 'string') {
+      onValue = on;
+    }
+
+    if (!!onValue) {
+      reference.on(onValue, function (snapshot) {
         var val = snapshot.val();
         var value = toArray$$1 ? objectToArray(val) : val;
         _this2.setState({ value: value, loading: false });
@@ -336,8 +345,15 @@ var FirebaseQuery = function (_React$Component) {
       });
     }
 
-    if (once) {
-      reference.once('value', function (snapshot) {
+    var onceValue = null;
+    if (typeof once === 'boolean' && once) {
+      onceValue = 'value';
+    } else if (typeof once === 'string') {
+      onceValue = once;
+    }
+
+    if (!!onceValue) {
+      reference.once(onceValue, function (snapshot) {
         var val = snapshot.val();
         var value = toArray$$1 ? objectToArray(val) : val;
         _this2.setState({ value: value, loading: false });

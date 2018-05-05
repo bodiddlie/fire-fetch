@@ -232,32 +232,64 @@ test('updates on any ref impacting prop', () => {
   const render = jest.fn((value, loading, ref) => <Dummy />);
   const propsThatUpdateRef = {
     fbapp: makeApp(),
-    rootPath: "newRootPath",
-    path: "newPath",
-    reference: makeRef("someOtherPath"),
+    rootPath: 'newRootPath',
+    path: 'newPath',
+    reference: makeRef('someOtherPath'),
     on: () => {},
     toArray: true,
     onChange: () => {},
     once: true,
-    orderByChild: "someStringToOrderBy",
-    equalTo: "string",
+    orderByChild: 'someStringToOrderBy',
+    equalTo: 'string',
     limitToLast: 5,
   };
   Object.keys(propsThatUpdateRef).forEach(keyThatUpdates => {
-    const newProp = { [keyThatUpdates]: propsThatUpdateRef[keyThatUpdates]};
-    const wrapper = mount(
-      <FirebaseQuery fbapp={app}>
-        {render}
-      </FirebaseQuery>
-    );
+    const newProp = { [keyThatUpdates]: propsThatUpdateRef[keyThatUpdates] };
+    const wrapper = mount(<FirebaseQuery fbapp={app}>{render}</FirebaseQuery>);
     const originalRef = wrapper.instance().ref;
     wrapper.setProps(newProp);
     wrapper.update();
     const newRef = wrapper.instance().ref;
-    
+
     expect(originalRef.off).toHaveBeenCalled();
     expect(newRef).not.toBe(originalRef);
   });
+});
+
+test('it calls on if updateOnValue is true', () => {
+  const app = makeApp();
+  const render = jest.fn((value, loading, ref) => <Dummy />);
+  mount(
+    <FirebaseQuery fbapp={app} rootPath="root" path="test" updateOnValue>
+      {render}
+    </FirebaseQuery>
+  );
+
+  expect(render.mock.calls[1][2].on.mock.calls[0][0]).toBe('value');
+});
+
+test('it calls on with the given child event if a string is given', () => {
+  const app = makeApp();
+  const render = jest.fn((value, loading, ref) => <Dummy />);
+  mount(
+    <FirebaseQuery fbapp={app} rootPath="root" path="test" on="child_added">
+      {render}
+    </FirebaseQuery>
+  );
+
+  expect(render.mock.calls[1][2].on.mock.calls[0][0]).toBe('child_added');
+});
+
+test('it call once with the given child event if a string is given', () => {
+  const app = makeApp();
+  const render = jest.fn((value, loading, ref) => <Dummy />);
+  mount(
+    <FirebaseQuery fbapp={app} rootPath="root" path="test" once="child_added">
+      {render}
+    </FirebaseQuery>
+  );
+
+  expect(render.mock.calls[1][2].once.mock.calls[0][0]).toBe('child_added');
 });
 //---------------------------------------------
 // UTIL

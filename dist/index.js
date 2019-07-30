@@ -616,3 +616,4 @@ exports.SignIn = SignIn;
 exports.withSignIn = withSignIn;
 exports.SignOut = SignOut;
 exports.withSignOut = withSignOut;
+exports.providers = providers;

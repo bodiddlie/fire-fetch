@@ -14,4 +14,5 @@ export {
   withSignIn,
   SignOut,
   withSignOut,
+  providers,
 } from './auth-listener';

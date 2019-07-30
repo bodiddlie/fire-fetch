@@ -1,8 +1,7 @@
 {
   "name": "fire-fetch",
-  "version": "0.3.1",
-  "description":
-    "Render-Prop React components for fetching data from the Firebase realtime database",
+  "version": "0.3.2",
+  "description": "Render-Prop React components for fetching data from the Firebase realtime database",
   "main": "dist/index.js",
   "module": "dist/index.es.js",
   "repository": {

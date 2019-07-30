@@ -595,4 +595,4 @@ function withSignOut(Component) {
   }(React.Component);
 }
 
-export { FirebaseProvider, FirebaseApp, withFbApp, RootRef, GetRootRef, withRootRef, firebaseRef as FirebaseRef, firebaseQuery as FirebaseQuery, authListener as AuthListener, User, withUser, SignIn, withSignIn, SignOut, withSignOut };
+export { FirebaseProvider, FirebaseApp, withFbApp, RootRef, GetRootRef, withRootRef, firebaseRef as FirebaseRef, firebaseQuery as FirebaseQuery, authListener as AuthListener, User, withUser, SignIn, withSignIn, SignOut, withSignOut, providers };
